@@ -14,6 +14,7 @@ apt-get install -y nodejs
 mkdir -p /usr/local/bin
 
 # Copy the MySQL check script to proper location
+cd /tmp/scripts
 cp check-mysql.sh /usr/local/bin/
 chmod +x /usr/local/bin/check-mysql.sh
 
