@@ -53,6 +53,7 @@ Wants=network.target
 
 [Service]
 Type=simple
+EnvironmentFile=/etc/environment
 ExecStart=/usr/local/bin/check-mysql.sh
 Restart=on-failure
 RestartSec=30
