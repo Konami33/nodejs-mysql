@@ -30,12 +30,19 @@ while [ -z "$DB_PRIVATE_IP" ]; do
     echo "Waiting for DB_PRIVATE_IP environment variable..."
     attempt=$((attempt + 1))
     sleep 10
+    # Source the environment file only once per iteration
     source /etc/environment
 done
 
 echo "DB_PRIVATE_IP is set to: $DB_PRIVATE_IP"
 
-sleep 180
+# Perform a single check to ensure MySQL server is reachable
+echo "Checking if MySQL server is reachable..."
+if /usr/local/bin/check-mysql.sh; then
+    echo "MySQL server is reachable!"
+else
+    echo "Warning: Failed to connect to MySQL server. The systemd service will continue to retry."
+fi
 
 # Install systemd service
 cat > /etc/systemd/system/mysql-check.service << 'EOL'
@@ -61,5 +68,4 @@ systemctl daemon-reload
 systemctl enable mysql-check
 systemctl start mysql-check
 
-# You can check the status with:
-systemctl status mysql-check
+echo "MySQL check service has been started. You can check the status with: systemctl status mysql-check"
