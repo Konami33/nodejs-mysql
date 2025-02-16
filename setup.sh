@@ -4,7 +4,7 @@ exec > >(tee /var/log/setup.log) 2>&1
 # Update system and install dependencies
 apt-get update
 apt-get upgrade -y
-apt-get install -y netcat-openbsd
+apt-get install -y netcat-openbsd mysql-client
 
 # Install Node.js
 curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
@@ -35,5 +35,31 @@ done
 
 echo "DB_PRIVATE_IP is set to: $DB_PRIVATE_IP"
 
-# Execute the MySQL check script
-/usr/local/bin/check-mysql.sh
+sleep 180
+
+# Install systemd service
+cat > /etc/systemd/system/mysql-check.service << 'EOL'
+[Unit]
+Description=MySQL Connectivity Check Service
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/check-mysql.sh
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:/var/log/mysql-check.log
+StandardError=append:/var/log/mysql-check.log
+
+[Install]
+WantedBy=multi-user.target
+EOL
+
+# Reload systemd and start service
+systemctl daemon-reload
+systemctl enable mysql-check
+systemctl start mysql-check
+
+# You can check the status with:
+systemctl status mysql-check
