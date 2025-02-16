@@ -36,13 +36,11 @@ done
 
 echo "DB_PRIVATE_IP is set to: $DB_PRIVATE_IP"
 
-# Perform a single check to ensure MySQL server is reachable
-echo "Checking if MySQL server is reachable..."
-if /usr/local/bin/check-mysql.sh; then
-    echo "MySQL server is reachable!"
-else
-    echo "Warning: Failed to connect to MySQL server. The systemd service will continue to retry."
-fi
+# Wait for MySQL server to be ready
+echo "Waiting for MySQL server to be ready..."
+sleep 300
+
+echo "Creating MySQL Connectivity Check Service"
 
 # Install systemd service
 cat > /etc/systemd/system/mysql-check.service << 'EOL'
